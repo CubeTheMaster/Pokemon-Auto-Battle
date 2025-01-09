@@ -48,21 +48,23 @@ def calculate_type_advantage(attacking_type, defender_type_1, defender_type_2=No
 
 
 
-'''
 # Funzione per scegliere la mossa migliore
-def select_best_move(moves, opponent_hp):
+
+
+def select_best_move(moves, opponent):
     best_move = None
     best_score = 0
 
     for move in moves:
         damage = move[3]
         accuracy = move[4]
+        type_effectiveness = calculate_type_advantage(move[2], opponent[2], opponent[3])
 
         # Se l'avversario ha pochi HP, privilegia precisione
-        if opponent_hp <= damage:
-            score = accuracy
+        if opponent[4] <= damage:
+            score = accuracy * type_effectiveness
         else:
-            score = damage * (accuracy / 100)
+            score = damage * (accuracy / 100) * type_effectiveness
 
         if score > best_score:
             best_score = score

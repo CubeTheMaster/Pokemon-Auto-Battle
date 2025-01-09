@@ -1,5 +1,4 @@
-
-
+from Battaglia import calculate_type_advantage
 
 # Funzione per recuperare un Pokémon dal database
 def get_pokemon(cursor, pokemon_name):

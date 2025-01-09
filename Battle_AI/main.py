@@ -1,7 +1,10 @@
 import mysql.connector
-import random
+from Pokemon import get_pokemon, select_best_pokemon
+from Mosse import get_moves
+from Battaglia import battle
 
-# Connessione al database
+# cambiare la connection in modo da renderla automatizzata
+# database connection
 def connect_to_database():
     return mysql.connector.connect(
         host="localhost",
@@ -10,12 +13,12 @@ def connect_to_database():
         database="lotta"
     )
 
-# Main del programma
+# Main function
 def main():
     db = connect_to_database()
     cursor = db.cursor()
 
-    # Scelta del Pokémon dell'utente
+    # The player chooses a Pokémon
     user_pokemon_name = input("Seleziona un Pokémon per la battaglia: ")
     user_pokemon = get_pokemon(cursor, user_pokemon_name)
 
@@ -25,14 +28,14 @@ def main():
 
     user_moves = get_moves(cursor, user_pokemon[0])
 
-    # Scelta del Pokémon dell'IA
+    # The IA chooses a Pokémon
     ai_pokemon = select_best_pokemon(cursor, user_pokemon)
     ai_moves = get_moves(cursor, ai_pokemon[0])
 
     print(f"\nHai scelto {user_pokemon[1]}!")
     print(f"L'IA ha scelto {ai_pokemon[1]}!\n")
 
-    # Avvia la battaglia
+    # Start battle
     battle(user_pokemon, user_moves, ai_pokemon, ai_moves)
 
     cursor.close()
@@ -46,12 +49,7 @@ if __name__ == "__main__":
 
 
 
-
-
-
-
-
-# Funzione per simulare lo scontro
+# Funcction for the battle
 
 def battle(pokemon1, moves1, pokemon2, moves2):
     hp1 = pokemon1[4]
@@ -75,11 +73,24 @@ def battle(pokemon1, moves1, pokemon2, moves2):
 
         print(f"{attacker[1]} usa {move[1]}!")
 
+
+
+        # Calcola l'efficacia di tipo
+        type_effectiveness = calculate_type_advantage(move[2], defender[2], defender[3])
+
+        # Determina se l'attacco è fisico o speciale
+        if move[5] == 'fisica':
+            attack_stat = attacker[5]
+            defense_stat = defender[6]
+        else:
+            attack_stat = attacker[7]
+            defense_stat = defender[8]
+
         # Calcola il danno
-        damage = move[3]  # Potresti aggiungere modificatori per vantaggio di tipo
+        damage = ((2 * 50 / 5 + 2) * move[3] * (attack_stat / defense_stat) / 50 + 2) * type_effectiveness
         defender_hp -= damage
 
-        print(f"{defender[1]} subisce {damage} danni! Rimangono {max(defender_hp, 0)} HP.")
+        print(f"{defender[1]} subisce {damage:.2f} danni! Rimangono {max(defender_hp, 0):.2f} HP.")
 
         # Aggiorna gli HP
         if attacker == pokemon1:
