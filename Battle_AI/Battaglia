@@ -1,30 +1,54 @@
 
 
 
-# Funzione per calcolare il vantaggio di tipo
-def calculate_type_advantage(attacking_type, defender_type_1, defender_type_2):
+def calculate_type_advantage(attacking_type, defender_type_1, defender_type_2=None):
     type_chart = {
-        'Fire': {'weak_to': ['Water', 'Rock'], 'strong_against': ['Grass', 'Ice', 'Bug', 'Steel']},
-        'Water': {'weak_to': ['Electric', 'Grass'], 'strong_against': ['Fire', 'Rock', 'Ground']},
-        'Electric': {'weak_to': ['Ground'], 'strong_against': ['Water', 'Flying']},
-        'Grass': {'weak_to': ['Fire', 'Ice', 'Poison', 'Flying', 'Bug'], 'strong_against': ['Water', 'Ground', 'Rock']},
-        # Aggiungi altre regole di tipi qui
+        'Normal': {'weak_to': ['Fighting'], 'strong_against': [], 'immune_to': ['Ghost']},
+        'Fire': {'weak_to': ['Water', 'Rock', 'Ground'], 'strong_against': ['Grass', 'Ice', 'Bug', 'Steel'], 'immune_to': []},
+        'Water': {'weak_to': ['Electric', 'Grass'], 'strong_against': ['Fire', 'Rock', 'Ground'], 'immune_to': []},
+        'Electric': {'weak_to': ['Ground'], 'strong_against': ['Water', 'Flying'], 'immune_to': []},
+        'Grass': {'weak_to': ['Fire', 'Ice', 'Poison', 'Flying', 'Bug'], 'strong_against': ['Water', 'Ground', 'Rock'], 'immune_to': []},
+        'Ice': {'weak_to': ['Fire', 'Fighting', 'Rock', 'Steel'], 'strong_against': ['Grass', 'Ground', 'Flying', 'Dragon'], 'immune_to': []},
+        'Fighting': {'weak_to': ['Flying', 'Psychic', 'Fairy'], 'strong_against': ['Normal', 'Ice', 'Rock', 'Dark', 'Steel'], 'immune_to': []},
+        'Poison': {'weak_to': ['Ground', 'Psychic'], 'strong_against': ['Grass', 'Fairy'], 'immune_to': []},
+        'Ground': {'weak_to': ['Water', 'Ice', 'Grass'], 'strong_against': ['Fire', 'Electric', 'Poison', 'Rock', 'Steel'], 'immune_to': ['Electric']},
+        'Flying': {'weak_to': ['Electric', 'Ice', 'Rock'], 'strong_against': ['Grass', 'Fighting', 'Bug'], 'immune_to': ['Ground']},
+        'Psychic': {'weak_to': ['Bug', 'Ghost', 'Dark'], 'strong_against': ['Fighting', 'Poison'], 'immune_to': []},
+        'Bug': {'weak_to': ['Fire', 'Flying', 'Rock'], 'strong_against': ['Grass', 'Psychic', 'Dark'], 'immune_to': []},
+        'Rock': {'weak_to': ['Water', 'Grass', 'Fighting', 'Ground', 'Steel'], 'strong_against': ['Fire', 'Ice', 'Flying', 'Bug'], 'immune_to': []},
+        'Ghost': {'weak_to': ['Ghost', 'Dark'], 'strong_against': ['Psychic', 'Ghost'], 'immune_to': ['Normal', 'Fighting']},
+        'Dragon': {'weak_to': ['Ice', 'Dragon', 'Fairy'], 'strong_against': ['Dragon'], 'immune_to': []},
+        'Dark': {'weak_to': ['Fighting', 'Bug', 'Fairy'], 'strong_against': ['Psychic', 'Ghost'], 'immune_to': ['Psychic']},
+        'Steel': {'weak_to': ['Fire', 'Fighting', 'Ground'], 'strong_against': ['Ice', 'Rock', 'Fairy'], 'immune_to': ['Poison']},
+        'Fairy': {'weak_to': ['Poison', 'Steel'], 'strong_against': ['Fighting', 'Dragon', 'Dark'], 'immune_to': ['Dragon']}
     }
 
-        multiplier = 1.0
-    if attacking_type in type_chart:
-        if defender_type_1 in type_chart[attacking_type]['strong_against']:
-            multiplier *= 2
-        if defender_type_2 and defender_type_2 in type_chart[attacking_type]['strong_against']:
-            multiplier *= 2
-        if defender_type_1 in type_chart[attacking_type]['weak_to']:
-            multiplier *= 0.5
-        if defender_type_2 and defender_type_2 in type_chart[attacking_type]['weak_to']:
-            multiplier *= 0.5
+    # Start with a neutral multiplier
+    multiplier = 1.0
+
+    # Helper function to calculate effect
+    def calculate_effect(attacking, defending):
+        nonlocal multiplier
+        if defending in type_chart[attacking]['strong_against']:
+            multiplier *= 2.0  # Super effective
+        elif defending in type_chart[attacking]['weak_to']:
+            multiplier *= 0.5  # Not very effective
+        elif defending in type_chart[attacking]['immune_to']:
+            multiplier *= 0.0  # No effect
+
+    # Check against the first defender type
+    calculate_effect(attacking_type, defender_type_1)
+
+    # Check against the second defender type if it exists
+    if defender_type_2:
+        calculate_effect(attacking_type, defender_type_2)
 
     return multiplier
 
 
+
+
+'''
 # Funzione per scegliere la mossa migliore
 def select_best_move(moves, opponent_hp):
     best_move = None
