@@ -1,0 +1,47 @@
+
+
+
+# Funzione per calcolare il vantaggio di tipo
+def calculate_type_advantage(attacking_type, defender_type_1, defender_type_2):
+    type_chart = {
+        'Fire': {'weak_to': ['Water', 'Rock'], 'strong_against': ['Grass', 'Ice', 'Bug', 'Steel']},
+        'Water': {'weak_to': ['Electric', 'Grass'], 'strong_against': ['Fire', 'Rock', 'Ground']},
+        'Electric': {'weak_to': ['Ground'], 'strong_against': ['Water', 'Flying']},
+        'Grass': {'weak_to': ['Fire', 'Ice', 'Poison', 'Flying', 'Bug'], 'strong_against': ['Water', 'Ground', 'Rock']},
+        # Aggiungi altre regole di tipi qui
+    }
+
+        multiplier = 1.0
+    if attacking_type in type_chart:
+        if defender_type_1 in type_chart[attacking_type]['strong_against']:
+            multiplier *= 2
+        if defender_type_2 and defender_type_2 in type_chart[attacking_type]['strong_against']:
+            multiplier *= 2
+        if defender_type_1 in type_chart[attacking_type]['weak_to']:
+            multiplier *= 0.5
+        if defender_type_2 and defender_type_2 in type_chart[attacking_type]['weak_to']:
+            multiplier *= 0.5
+
+    return multiplier
+
+
+# Funzione per scegliere la mossa migliore
+def select_best_move(moves, opponent_hp):
+    best_move = None
+    best_score = 0
+
+    for move in moves:
+        damage = move[3]
+        accuracy = move[4]
+
+        # Se l'avversario ha pochi HP, privilegia precisione
+        if opponent_hp <= damage:
+            score = accuracy
+        else:
+            score = damage * (accuracy / 100)
+
+        if score > best_score:
+            best_score = score
+            best_move = move
+
+    return best_move

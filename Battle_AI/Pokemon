@@ -1,0 +1,27 @@
+
+
+
+# Funzione per recuperare un Pokémon dal database
+def get_pokemon(cursor, pokemon_name):
+    query = """
+        SELECT * FROM pokemon WHERE name = %s
+    """
+    cursor.execute(query, (pokemon_name,))
+    return cursor.fetchone()
+
+# Funzione per scegliere il miglior Pokémon per l'IA
+def select_best_pokemon(cursor, opponent_pokemon):
+    query = "SELECT * FROM pokemon"
+    cursor.execute(query)
+    available_pokemons = cursor.fetchall()
+
+    best_pokemon = None
+    best_advantage = 0
+
+    for pokemon in available_pokemons:
+        advantage = calculate_type_advantage(pokemon[2], opponent_pokemon[2], opponent_pokemon[3])
+        if advantage > best_advantage:
+            best_advantage = advantage
+            best_pokemon = pokemon
+
+    return best_pokemon
