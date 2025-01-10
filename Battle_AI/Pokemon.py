@@ -1,26 +1,18 @@
-from Battaglia import calculate_type_advantage
 
-# Funzione per recuperare un Pokémon dal database
-def get_pokemon(cursor, pokemon_name):
-    query = """
-        SELECT * FROM pokemon WHERE name = %s
-    """
-    cursor.execute(query, (pokemon_name,))
-    return cursor.fetchone()
+# Funzione per ottenere dei Pokémon casuali
+def get_random_pokemons(cursor, team_size):
+    query = "SELECT * FROM pokemon ORDER BY RAND() LIMIT %s"
+    cursor.execute(query, [team_size,])
+    return [list(pokemon) for pokemon in cursor.fetchall()]
 
-# Funzione per scegliere il miglior Pokémon per l'IA
-def select_best_pokemon(cursor, opponent_pokemon):
-    query = "SELECT * FROM pokemon"
-    cursor.execute(query)
-    available_pokemons = cursor.fetchall()
-
-    best_pokemon = None
-    best_advantage = 0
-
-    for pokemon in available_pokemons:
-        advantage = calculate_type_advantage(pokemon[2], opponent_pokemon[2], opponent_pokemon[3])
-        if advantage > best_advantage:
-            best_advantage = advantage
-            best_pokemon = pokemon
-
-    return best_pokemon
+# Funzione per scegliere un Pokémon iniziale
+def choose_pokemon(team):
+    while True:
+        try:
+            choice = int(input("Seleziona il numero del Pokémon che vuoi mandare in campo: "))
+            if 1 <= choice <= len(team):
+                return team[choice - 1]
+            else:
+                print("Scelta non valida. Riprova.")
+        except ValueError:
+            print("Inserisci un numero valido.")
