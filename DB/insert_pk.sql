@@ -10,7 +10,13 @@ VALUES
 (373, 'Salamence', 'Dragon', 'Flying', 95, 135, 80, 110, 80, 100),
 (530, 'Excadrill', 'Steel', 'Ground', 110, 135, 60, 50, 65, 88),
 (149, 'Dragonite', 'Dragon', 'Flying', 91, 134, 95, 100, 100, 80),
-(392, 'Infernape', 'Fire', 'Fighting', 76, 104, 71, 104, 71, 108);
+(392, 'Infernape', 'Fire', 'Fighting', 76, 104, 71, 104, 71, 108),
+(448, 'Lucario', 'Fighting', 'steel', 70, 110, 70, 115, 70, 90),
+(384, 'Rayquaza', 'Dragon', 'Flying', 105, 150, 90, 150, 90, 95),
+(1006, 'Iron_Valiant', 'Fairy', 'Fighting', 74, 130, 90, 120, 60, 116),
+(497, 'Serperior', 'Grass', NULL, 75, 75, 95, 75, 95, 113),
+(282, 'Gardevoir', 'Psychic', 'Fairy', 68, 65, 65, 125, 115, 80);
+
 
 -- Inserimenti nella tabella mossa
 INSERT INTO mossa (id, nome, type_1, damage, accuracy, categoria)
