@@ -1,4 +1,5 @@
 from Pokemon import choose_pokemon
+from Accuracy import does_move_hit
 
 # Funzione per simulare una battaglia utente vs IA
 # Riscrivere alcune parti del codice per renderlo più facile da leggere e mantenere la funzionalità
@@ -113,6 +114,128 @@ def user_vs_ai_battle(user_team, ai_team):
 
 # Funzione per simulare una battaglia IA vs IA
 # Funzione non ancora disponibile, manca una logica per far combattere due squadre IA
+def user_vs_ai_battle(user_team, ai_team):
+    print("\nInizia la battaglia!")
+
+    while user_team and ai_team:
+        # Seleziona il Pokémon dell'utente
+        print("\nIl tuo team attuale:")
+        display_team(user_team)
+        print("\nScegli il tuo Pokémon iniziale o successivo")
+        user_active_pokemon, user_active_moves = choose_pokemon(user_team)
+
+        # Seleziona il Pokémon dell'IA
+        ai_active_pokemon, ai_active_moves = max(ai_team, key=lambda p: calculate_type_advantage(p[0][2], user_active_pokemon[2], user_active_pokemon[3]))
+
+        print(f"\nHai scelto {user_active_pokemon[1]}! L'IA ha scelto {ai_active_pokemon[1]}!")
+
+        user_hp = user_active_pokemon[4]
+        ai_hp = ai_active_pokemon[4]
+
+        while user_hp > 0 and ai_hp > 0:
+            print("\nLe tue mosse disponibili:")
+            for idx, move in enumerate(user_active_moves):
+                print(f"[{idx + 1}] {move[1]} (Danno: {move[3]}, Precisione: {move[4]})")
+
+            while True:
+                try:
+                    user_move_idx = int(input("Seleziona il numero della mossa da usare: ")) - 1
+                    if 0 <= user_move_idx < len(user_active_moves):
+                        user_move = user_active_moves[user_move_idx]
+                        break
+                    else:
+                        print("Scelta non valida. Riprova.")
+                except ValueError:
+                    print("Inserisci un numero valido.")
+
+            if user_active_pokemon[9] >= ai_active_pokemon[9]:
+                print(f"Il tuo {user_active_pokemon[1]} usa {user_move[1]}! ")
+
+                if does_move_hit(user_move[4]):
+                    type_effectiveness = calculate_type_advantage(user_move[2], ai_active_pokemon[2], ai_active_pokemon[3])
+                    attack_stat = user_active_pokemon[5] if user_move[5] == 'fisica' else user_active_pokemon[7]
+                    defense_stat = ai_active_pokemon[6] if user_move[5] == 'fisica' else ai_active_pokemon[8]
+
+                    damage = ((2 * 50 / 5 + 2) * user_move[3] * (attack_stat / defense_stat) / 50 + 2) * type_effectiveness
+                    ai_hp -= damage
+                    ai_active_pokemon[4] = max(ai_hp, 0)
+
+                    print(f"{ai_active_pokemon[1]} subisce {damage:.2f} danni! Rimangono {ai_hp:.2f} HP.")
+
+                    if ai_hp <= 0:
+                        print(f"Il {ai_active_pokemon[1]} avversario è stato sconfitto!")
+                        ai_team.remove([ai_active_pokemon, ai_active_moves])
+                        break
+                else:
+                    print(f"Il {user_active_pokemon[1]} ha mancato!")
+
+                ai_move = select_best_move(ai_active_moves, user_active_pokemon)
+                print(f"Il {ai_active_pokemon[1]} avversario usa {ai_move[1]}!")
+                if does_move_hit(ai_move[4]):
+                    type_effectiveness = calculate_type_advantage(ai_move[2], user_active_pokemon[2], user_active_pokemon[3])
+                    attack_stat = ai_active_pokemon[5] if ai_move[5] == 'fisica' else ai_active_pokemon[7]
+                    defense_stat = user_active_pokemon[6] if ai_move[5] == 'fisica' else user_active_pokemon[8]
+
+                    damage = ((2 * 50 / 5 + 2) * ai_move[3] * (attack_stat / defense_stat) / 50 + 2) * type_effectiveness
+                    user_hp -= damage
+                    user_active_pokemon[4] = max(user_hp, 0)
+
+                    print(f"{user_active_pokemon[1]} subisce {damage:.2f} danni! Rimangono {user_hp:.2f} HP.")
+
+                    if user_hp <= 0:
+                        print(f"Il tuo {user_active_pokemon[1]} è stato sconfitto!")
+                        user_team.remove([user_active_pokemon, user_active_moves])
+                        break
+                else:
+                    print(f"Il {ai_active_pokemon[1]} ha mancato!")
+
+            else:
+                ai_move = select_best_move(ai_active_moves, user_active_pokemon)
+                print(f"Il {ai_active_pokemon[1]} avversario usa {ai_move[1]}!")
+                if does_move_hit(ai_move[4]):
+                    type_effectiveness = calculate_type_advantage(ai_move[2], user_active_pokemon[2], user_active_pokemon[3])
+                    attack_stat = ai_active_pokemon[5] if ai_move[5] == 'fisica' else ai_active_pokemon[7]
+                    defense_stat = user_active_pokemon[6] if ai_move[5] == 'fisica' else user_active_pokemon[8]
+
+                    damage = ((2 * 50 / 5 + 2) * ai_move[3] * (attack_stat / defense_stat) / 50 + 2) * type_effectiveness
+                    user_hp -= damage
+                    user_active_pokemon[4] = max(user_hp, 0)
+
+                    print(f"{user_active_pokemon[1]} subisce {damage:.2f} danni! Rimangono {user_hp:.2f} HP.")
+
+                    if user_hp <= 0:
+                        print(f"Il tuo {user_active_pokemon[1]} è stato sconfitto!")
+                        user_team.remove([user_active_pokemon, user_active_moves])
+                        break
+                else:
+                    print(f"Il {ai_active_pokemon[1]} ha mancato!")
+
+                print(f"Il tuo {user_active_pokemon[1]} usa {user_move[1]}! ")
+                if does_move_hit(user_move[4]):
+                    type_effectiveness = calculate_type_advantage(user_move[2], ai_active_pokemon[2], ai_active_pokemon[3])
+                    attack_stat = user_active_pokemon[5] if user_move[5] == 'fisica' else user_active_pokemon[7]
+                    defense_stat = ai_active_pokemon[6] if user_move[5] == 'fisica' else ai_active_pokemon[8]
+
+                    damage = ((2 * 50 / 5 + 2) * user_move[3] * (attack_stat / defense_stat) / 50 + 2) * type_effectiveness
+                    ai_hp -= damage
+                    ai_active_pokemon[4] = max(ai_hp, 0)
+
+                    print(f"{ai_active_pokemon[1]} subisce {damage:.2f} danni! Rimangono {ai_hp:.2f} HP.")
+
+                    if ai_hp <= 0:
+                        print(f"{ai_active_pokemon[1]} è stato sconfitto!")
+                        ai_team.remove([ai_active_pokemon, ai_active_moves])
+                        break
+                else:
+                    print(f"Il {user_active_pokemon[1]} ha mancato!")
+
+    if not user_team:
+        print("\nHai perso la battaglia!")
+    elif not ai_team:
+        print("\nHai vinto la battaglia!")
+
+
+# Funzione per simulare una battaglia IA vs IA
 def ai_vs_ai_battle(ai_team_1, ai_team_2):
     print("\nBattaglia tra due squadre IA!")
 
@@ -125,79 +248,92 @@ def ai_vs_ai_battle(ai_team_1, ai_team_2):
         ai1_hp = ai1_active_pokemon[4]
         ai2_hp = ai2_active_pokemon[4]
 
-        # Validazione iniziale
-        print(f"HP iniziali: {ai1_active_pokemon[1]}: {ai1_hp}, {ai2_active_pokemon[1]}: {ai2_hp}")
-        assert ai1_hp > 0 and ai2_hp > 0, "HP non validi all'inizio della battaglia"
-
         while ai1_hp > 0 and ai2_hp > 0:
             ai1_move = select_best_move(ai1_active_moves, ai2_active_pokemon)
             ai2_move = select_best_move(ai2_active_moves, ai1_active_pokemon)
 
-            # Validazione mosse
-            assert ai1_move is not None, f"{ai1_active_pokemon[1]} non ha mosse valide!"
-            assert ai2_move is not None, f"{ai2_active_pokemon[1]} non ha mosse valide!"
-
-
             if ai1_active_pokemon[9] >= ai2_active_pokemon[9]:
                 print(f"Il {ai1_active_pokemon[1]} usa {ai1_move[1]}!")
-                type_effectiveness = calculate_type_advantage(ai1_move[2], ai2_active_pokemon[2], ai2_active_pokemon[3])
-                attack_stat = ai1_active_pokemon[5] if ai1_move[5] == 'fisica' else ai1_active_pokemon[7]
-                defense_stat = ai2_active_pokemon[6] if ai1_move[5] == 'fisica' else ai2_active_pokemon[8]
+                if does_move_hit(ai1_move[4]):
+                    type_effectiveness = calculate_type_advantage(ai1_move[2], ai2_active_pokemon[2], ai2_active_pokemon[3])
+                    attack_stat = ai1_active_pokemon[5] if ai1_move[5] == 'fisica' else ai1_active_pokemon[7]
+                    defense_stat = ai2_active_pokemon[6] if ai1_move[5] == 'fisica' else ai2_active_pokemon[8]
 
-                damage = ((2 * 50 / 5 + 2) * ai1_move[3] * (attack_stat / defense_stat) / 50 + 2) * type_effectiveness
-                ai2_hp -= damage
-                ai2_active_pokemon[4] = max(ai2_hp, 0)
+                    damage = ((2 * 50 / 5 + 2) * ai1_move[3] * (attack_stat / defense_stat) / 50 + 2) * type_effectiveness
+                    ai2_hp -= damage
+                    ai2_active_pokemon[4] = max(ai2_hp, 0)
 
-                print(f"{ai2_active_pokemon[1]} subisce {damage:.2f} danni! Rimangono {ai2_hp:.2f} HP.")
+                    print(f"{ai2_active_pokemon[1]} subisce {damage:.2f} danni! Rimangono {ai2_hp:.2f} HP.")
 
-                if ai2_hp <= 0:
-                    print(f"{ai2_active_pokemon[1]} è stato sconfitto!")
-                    ai_team_2.pop(0)
+                    if ai2_hp <= 0:
+                        print(f"{ai2_active_pokemon[1]} è stato sconfitto!")
+                        ai_team_2.pop(0)
+                        break
+                else:
+                    print(f"Il {ai1_active_pokemon[1]} ha mancato!")
 
                 print(f"Il {ai2_active_pokemon[1]} usa {ai2_move[1]}!")
-                type_effectiveness = calculate_type_advantage(ai2_move[2], ai1_active_pokemon[2], ai1_active_pokemon[3])
-                attack_stat = ai2_active_pokemon[5] if ai2_move[5] == 'fisica' else ai2_active_pokemon[7]
-                defense_stat = ai1_active_pokemon[6] if ai2_move[5] == 'fisica' else ai1_active_pokemon[8]
+                if does_move_hit(ai2_move[4]):
+                    type_effectiveness = calculate_type_advantage(ai2_move[2], ai1_active_pokemon[2], ai1_active_pokemon[3])
+                    attack_stat = ai2_active_pokemon[5] if ai2_move[5] == 'fisica' else ai2_active_pokemon[7]
+                    defense_stat = ai1_active_pokemon[6] if ai2_move[5] == 'fisica' else ai1_active_pokemon[8]
 
-                damage = ((2 * 50 / 5 + 2) * ai2_move[3] * (attack_stat / defense_stat) / 50 + 2) * type_effectiveness
-                ai1_hp -= damage
-                ai1_active_pokemon[4] = max(ai1_hp, 0)
+                    damage = ((2 * 50 / 5 + 2) * ai2_move[3] * (attack_stat / defense_stat) / 50 + 2) * type_effectiveness
+                    ai1_hp -= damage
+                    ai1_active_pokemon[4] = max(ai1_hp, 0)
 
-                print(f"{ai1_active_pokemon[1]} subisce {damage:.2f} danni! Rimangono {ai1_hp:.2f} HP.")
+                    print(f"{ai1_active_pokemon[1]} subisce {damage:.2f} danni! Rimangono {ai1_hp:.2f} HP.")
 
-                if ai1_hp <= 0:
-                    print(f"{ai1_active_pokemon[1]} è stato sconfitto!")
-                    ai_team_1.pop(0)
+                    if ai1_hp <= 0:
+                        print(f"{ai1_active_pokemon[1]} è stato sconfitto!")
+                        ai_team_1.pop(0)
+                        break
+                else:
+                    print(f"Il {ai2_active_pokemon[1]} ha mancato!")
+
             else:
                 print(f"Il {ai2_active_pokemon[1]} usa {ai2_move[1]}!")
-                type_effectiveness = calculate_type_advantage(ai2_move[2], ai1_active_pokemon[2], ai1_active_pokemon[3])
-                attack_stat = ai2_active_pokemon[5] if ai2_move[5] == 'fisica' else ai2_active_pokemon[7]
-                defense_stat = ai1_active_pokemon[6] if ai2_move[5] == 'fisica' else ai1_active_pokemon[8]
+                if does_move_hit(ai2_move[4]):
+                    type_effectiveness = calculate_type_advantage(ai2_move[2], ai1_active_pokemon[2], ai1_active_pokemon[3])
+                    attack_stat = ai2_active_pokemon[5] if ai2_move[5] == 'fisica' else ai2_active_pokemon[7]
+                    defense_stat = ai1_active_pokemon[6] if ai2_move[5] == 'fisica' else ai1_active_pokemon[8]
 
-                damage = ((2 * 50 / 5 + 2) * ai2_move[3] * (attack_stat / defense_stat) / 50 + 2) * type_effectiveness
-                ai1_hp -= damage
-                ai1_active_pokemon[4] = max(ai1_hp, 0)
+                    damage = ((2 * 50 / 5 + 2) * ai2_move[3] * (attack_stat / defense_stat) / 50 + 2) * type_effectiveness
+                    ai1_hp -= damage
+                    ai1_active_pokemon[4] = max(ai1_hp, 0)
 
-                print(f"{ai1_active_pokemon[1]} subisce {damage:.2f} danni! Rimangono {ai1_hp:.2f} HP.")
+                    print(f"{ai1_active_pokemon[1]} subisce {damage:.2f} danni! Rimangono {ai1_hp:.2f} HP.")
 
-                if ai1_hp <= 0:
-                    print(f"{ai1_active_pokemon[1]} è stato sconfitto!")
-                    ai_team_1.pop(0)
+                    if ai1_hp <= 0:
+                        print(f"{ai1_active_pokemon[1]} è stato sconfitto!")
+                        ai_team_1.pop(0)
+                        break
+                else:
+                    print(f"Il {ai2_active_pokemon[1]} ha mancato!")
+
                 print(f"Il {ai1_active_pokemon[1]} usa {ai1_move[1]}!")
-                type_effectiveness = calculate_type_advantage(ai1_move[2], ai2_active_pokemon[2], ai2_active_pokemon[3])
-                attack_stat = ai1_active_pokemon[5] if ai1_move[5] == 'fisica' else ai1_active_pokemon[7]
-                defense_stat = ai2_active_pokemon[6] if ai1_move[5] == 'fisica' else ai2_active_pokemon[8]
+                if does_move_hit(ai1_move[4]):
+                    type_effectiveness = calculate_type_advantage(ai1_move[2], ai2_active_pokemon[2], ai2_active_pokemon[3])
+                    attack_stat = ai1_active_pokemon[5] if ai1_move[5] == 'fisica' else ai1_active_pokemon[7]
+                    defense_stat = ai2_active_pokemon[6] if ai1_move[5] == 'fisica' else ai2_active_pokemon[8]
 
-                damage = ((2 * 50 / 5 + 2) * ai1_move[3] * (attack_stat / defense_stat) / 50 + 2) * type_effectiveness
-                ai2_hp -= damage
-                ai2_active_pokemon[4] = max(ai2_hp, 0)
+                    damage = ((2 * 50 / 5 + 2) * ai1_move[3] * (attack_stat / defense_stat) / 50 + 2) * type_effectiveness
+                    ai2_hp -= damage
+                    ai2_active_pokemon[4] = max(ai2_hp, 0)
 
-                print(f"{ai2_active_pokemon[1]} subisce {damage:.2f} danni! Rimangono {ai2_hp:.2f} HP.")
+                    print(f"{ai2_active_pokemon[1]} subisce {damage:.2f} danni! Rimangono {ai2_hp:.2f} HP.")
 
-                if ai2_hp <= 0:
-                    print(f"{ai2_active_pokemon[1]} è stato sconfitto!")
-                    ai_team_2.pop(0)
-                
+                    if ai2_hp <= 0:
+                        print(f"{ai2_active_pokemon[1]} è stato sconfitto!")
+                        ai_team_2.pop(0)
+                        break
+                else:
+                    print(f"Il {ai1_active_pokemon[1]} ha mancato!")
+
+    if not ai_team_1:
+        print("\nLa seconda squadra IA ha vinto!")
+    elif not ai_team_2:
+        print("\nLa prima squadra IA ha vinto!")
 
                     
 

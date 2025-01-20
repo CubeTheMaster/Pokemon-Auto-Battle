@@ -5,17 +5,18 @@ from Battaglia import *
 
 # cambiare la connection in modo da renderla automatizzata
 # database connection
-def connect_to_database():
+def connect_to_database(password):
     return mysql.connector.connect(
         host="localhost",
         user="root",
-        password="1235",
+        password= password,
         database="lotta"
     )
 
 # Main function
 def main():
-    db = connect_to_database()
+    password = input("Inserisci la password del database: ")
+    db = connect_to_database(password)
     cursor = db.cursor()
 
     # Chiedi all'utente la dimensione del team
