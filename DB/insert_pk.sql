@@ -21,31 +21,43 @@ VALUES
 -- Inserimenti nella tabella mossa
 INSERT INTO mossa (id, nome, type_1, damage, accuracy, categoria)
 VALUES
-(1, 'Tackle', 'Normal', 40, 100, 'fisica'),
-(2, 'Flamethrower', 'Fire', 90, 100, 'speciale'),
-(3, 'Thunderbolt', 'Electric', 90, 100, 'speciale'),
-(4, 'Earthquake', 'Ground', 100, 100, 'fisica'),
-(5, 'Ice Beam', 'Ice', 90, 100, 'speciale'),
-(6, 'Crunch', 'Dark', 80, 100, 'fisica'),
-(7, 'Shadow Ball', 'Ghost', 80, 100, 'speciale'),
-(8, 'Stone Edge', 'Rock', 100, 80, 'fisica'),
-(9, 'Hyper Beam', 'Normal', 150, 90, 'speciale'),
-(10, 'Flare Blitz', 'Fire', 120, 100, 'fisica'),
-(11, 'Quick Attack', 'Normal', 40, 100, 'fisica'),
-(12, 'Iron Tail', 'Steel', 100, 75, 'fisica'),
-(13, 'Dragon Claw', 'Dragon', 80, 100, 'fisica'),
-(14, 'Air Slash', 'Flying', 75, 95, 'speciale'),
-(15, 'Hydro Pump', 'Water', 110, 80, 'speciale'),
+(1, 'Tackle', 'Normal', 20, 100, 'fisica'),
+(2, 'Flamethrower', 'Fire', 45, 100, 'speciale'),
+(3, 'Thunderbolt', 'Electric', 45, 100, 'speciale'),
+(4, 'Earthquake', 'Ground', 50, 100, 'fisica'),
+(5, 'Ice Beam', 'Ice', 45, 100, 'speciale'),
+(6, 'Crunch', 'Dark', 40, 100, 'fisica'),
+(7, 'Shadow Ball', 'Ghost', 40, 100, 'speciale'),
+(8, 'Stone Edge', 'Rock', 50, 80, 'fisica'),
+(9, 'Hyper Beam', 'Normal', 75, 90, 'speciale'),
+(10, 'Flare Blitz', 'Fire', 60, 100, 'fisica'),
+(11, 'Quick Attack', 'Normal', 20, 100, 'fisica'),
+(12, 'Iron Tail', 'Steel', 50, 75, 'fisica'),
+(13, 'Dragon Claw', 'Dragon', 40, 100, 'fisica'),
+(14, 'Air Slash', 'Flying', 37, 95, 'speciale'),
+(15, 'Hydro Pump', 'Water', 55, 80, 'speciale'),
 (16, 'Protect', 'Normal', 0, 100, 'speciale'),
 (17, 'Will-O-Wisp', 'Fire', 0, 75, 'speciale'),
 (18, 'Sludge Bomb', 'Poison', 90, 100, 'speciale'),
 (19, 'Pursuit', 'Dark', 40, 100, 'fisica'),
-(20, 'Fly', 'Flying', 90, 95, 'fisica'),
-(21, 'Iron Head', 'Steel', 80, 100, 'fisica'),
-(22, 'X-Scissor', 'Bug', 80, 100, 'fisica'),
-(23, 'Fire Punch', 'Fire', 75, 100, 'fisica'),
-(24, 'Close Combat', 'Fighting', 120, 100, 'fisica'),
-(25, 'U-turn', 'Bug', 70, 100, 'fisica');
+(20, 'Fly', 'Flying', 45, 95, 'fisica'),
+(21, 'Iron Head', 'Steel', 40, 100, 'fisica'),
+(22, 'X-Scissor', 'Bug', 40, 100, 'fisica'),
+(23, 'Fire Punch', 'Fire', 37, 100, 'fisica'),
+(24, 'Close Combat', 'Fighting', 60, 100, 'fisica'),
+(25, 'U-turn', 'Bug', 35, 100, 'fisica'),
+(26, 'Extreme Speed', 'Normal', 40, 100, 'fisica'),
+(27, 'Aura Sphere', 'Fighting', 40, 100, 'speciale'),
+(28, 'Moonblast', 'Fairy', 47, 100, 'speciale'),
+(29, 'Leaf Storm', 'Grass', 65, 90, 'speciale'),
+(30, 'Draco Meteor', 'Dragon', 65, 90, 'speciale'),
+(31, 'Psychic', 'Psychic', 45, 100, 'speciale'),
+(32, 'Focus Blast', 'Fighting', 60, 70, 'speciale'),
+(33, 'Flash Cannon', 'Steel', 40, 100, 'speciale'),
+(34, 'Energy Ball', 'Grass', 45, 100, 'speciale'),
+(35, 'Dragon Pulse', 'Dragon', 42, 100, 'speciale'),
+(36, 'Brick Break', 'Fighting', 37, 100, 'fisica'),
+(37, 'Spirit Break', 'Fairy', 37, 100, 'fisica');
 
 -- Inserimenti nella tabella conosce (associando i Pokémon alle mosse)
 INSERT INTO conosce (id_pk, id_mossa)
@@ -94,3 +106,28 @@ VALUES
 (392, 6), -- Infernape conosce Crunch
 (392, 24),-- Infernape conosce Close Combat
 (392, 25);-- Infernape conosce U-turn
+
+(448, 26), -- Lucario conosce Extreme Speed
+(448, 27), -- Lucario conosce Aura Sphere
+(448, 33), -- Lucario conosce Flash Cannon
+(448, 36), -- Lucario conosce Brick Break
+
+(282, 28), -- Gardevoir conosce Moonblast
+(282, 31), -- Gardevoir conosce Psychic
+(282, 34), -- Gardevoir conosce Energy Ball
+(282, 3),  -- Gardevoir conosce Thunderbolt
+
+(497, 29), -- Serperior conosce Leaf Storm
+(497, 34), -- Serperior conosce Energy Ball
+(497, 32), -- Serperior conosce Focus Blast
+(497, 1),  -- Serperior conosce Tackle
+
+(384, 30), -- Rayquaza conosce Draco Meteor
+(384, 35), -- Rayquaza conosce Dragon Pulse
+(384, 2),  -- Rayquaza conosce Flamethrower
+(384, 3),  -- Rayquaza conosce Thunderbolt
+
+(1006, 30); -- Iron Valiant conosce Draco Meteor
+(1006, 35), -- Iron Valiant conosce Dragon Pulse
+(1006, 32); -- Iron Valiant conosce Focus Blast
+(1006, 37); -- Iron Valiant conosce Spirit Break
