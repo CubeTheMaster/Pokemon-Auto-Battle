@@ -30,16 +30,6 @@ def main():
         except ValueError:
             print("Inserisci un numero valido.")
 
-    # Genera i team
-    user_team = get_random_pokemons(cursor, team_size)
-    user_team_with_moves = assign_random_moves(cursor, user_team)
-
-    ai_team_1 = get_random_pokemons(cursor, team_size)
-    ai_team_with_moves_1 = assign_random_moves(cursor, ai_team_1)
-
-    ai_team_2 = get_random_pokemons(cursor, team_size)
-    ai_team_with_moves_2 = assign_random_moves(cursor, ai_team_2)
-
     # Chiedi all'utente l'azione da intraprendere
     print("\nVuoi partecipare alla battaglia o guardare una sfida tra IA?")
     print("1. Partecipa alla battaglia")
@@ -49,15 +39,24 @@ def main():
         try:
             choice = int(input("Seleziona un'opzione (1 o 2): "))
             if choice == 1:
-                user_vs_ai_battle(user_team_with_moves, ai_team_with_moves_1, cursor)
+                user_team = get_random_pokemons(cursor, team_size)
+                user_team_with_moves = assign_random_moves(cursor, user_team)
+
+                ai_team_1 = get_random_pokemons(cursor, team_size)
+                ai_team_with_moves_1 = assign_random_moves(cursor, ai_team_1)
+                user_vs_ai_battle(user_team_with_moves, ai_team_with_moves_1, cursor, team_size)
                 break
             elif choice == 2:
+                ai_team_1 = get_random_pokemons(cursor, team_size)
+                ai_team_with_moves_1 = assign_random_moves(cursor, ai_team_1)
+                ai_team_2 = get_random_pokemons(cursor, team_size)
+                ai_team_with_moves_2 = assign_random_moves(cursor, ai_team_2)
                 ai_vs_ai_battle(ai_team_with_moves_1, ai_team_with_moves_2, cursor)
                 break
             else:
                 print("Scelta non valida. Riprova.")
         except ValueError:
-            print("Inserisci un numero valido.")
+            print("Inserisci un numero valido. l'errore è qui")
 
     cursor.close()
     db.close()
