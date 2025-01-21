@@ -49,10 +49,10 @@ def main():
         try:
             choice = int(input("Seleziona un'opzione (1 o 2): "))
             if choice == 1:
-                user_vs_ai_battle(user_team_with_moves, ai_team_with_moves_1)
+                user_vs_ai_battle(user_team_with_moves, ai_team_with_moves_1, cursor)
                 break
             elif choice == 2:
-                ai_vs_ai_battle(ai_team_with_moves_1, ai_team_with_moves_2)
+                ai_vs_ai_battle(ai_team_with_moves_1, ai_team_with_moves_2, cursor)
                 break
             else:
                 print("Scelta non valida. Riprova.")
