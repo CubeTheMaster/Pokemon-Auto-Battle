@@ -47,27 +47,6 @@ def use_potion_menu(cursor, pokemon):
         except ValueError:
             print(f"Inserisci un numero valido.")
 
-def handle_user_turn(user_active_pokemon, user_active_moves, cursor, user_team):
-    print(f"\nLe tue mosse disponibili:")
-    for idx, move in enumerate(user_active_moves):
-        print(f"[{idx + 1}] {move[1]} (Danno: {move[3]}, Precisione: {move[4]})")
-    print(f"[0] Usa una pozione")
-    print(f"[{len(user_active_moves) + 1}] Cambia Pokémon")
-    
-    while True:
-        try:
-            action = int(input("Seleziona un'azione: "))
-            if action == 0:
-                return use_potion_menu(cursor, user_active_pokemon) #da controllare
-                return None
-            elif 1 <= action <= len(user_active_moves):
-                return user_active_moves[action - 1]
-            elif action == len(user_active_moves) + 1: #da controllare
-                return choose_pokemon(user_team, len(user_team))
-            else:
-                print(f"Scelta non valida. Riprova.")
-        except ValueError:
-            print(f"Inserisci un numero valido.")
 
 # Funzione per scegliere la mossa migliore
 def select_best_move(moves, opponent):
@@ -91,6 +70,11 @@ def select_best_move(moves, opponent):
 
     return best_move
 
+def show_moves(pokemon):
+    print(f"\nLe mosse di {pokemon[0]}:")
+    for move in pokemon[1]:
+        print(f"- {move[0]} (Potenza: {move[3]}, Precisione: {move[4]})")
+
 def show_team(user_team):
     print(f"\nIl tuo team attuale:")
     display_team(user_team)
@@ -102,104 +86,153 @@ def compare_speed(pokemon1, pokemon2):
         return pokemon2
     else:
         return random.choice([pokemon1, pokemon2])
+    
+def choose_move(pokemon_moves):
+    print(f"\nScegli una mossa per {pokemon_moves[0][1]}:")
+    for idx, move in enumerate(pokemon_moves[1]):
+        print(f"[{idx + 1}] {move[1]} (Danno: {move[3]}, Precisione: {move[4]})")
+
+    while True:
+        try:
+            choice = int(input("Seleziona una mossa: "))
+            if 1 <= choice <= len(pokemon_moves[1]):
+                return pokemon_moves[1][choice - 1]
+            else:
+                print("Scelta non valida. Riprova.")
+        except ValueError:
+            print("Inserisci un numero valido.")
 
 def user_vs_ai_battle(user_team, ai_team, cursor, team_size):
     print(f"\nInizia la battaglia!")
     ai_token = 3
-    first_turn = True
 
     show_team(user_team)
 
     user_active_pokemon, user_active_moves = choose_pokemon(user_team, team_size)
     print(f"\nVai {user_active_pokemon[1]}! Io credo in te!")
+    ai_active_pokemon, ai_active_moves = max(ai_team, key=lambda p: calculate_type_advantage(p[0][2], user_active_pokemon[2], user_active_pokemon[3]))
+    user_hp = user_active_pokemon[4]
+    ai_hp = ai_active_pokemon[4]
+    print(f"\nGennaro (Bullo) manda in campo {ai_active_pokemon[1]}")
 
-    user_switched = False
+
     ai_switched = False
-    user_defeated = False
-    ai_defeated = False
 
     while user_team and ai_team:
-        if first_turn:
-            user_active_pokemon, user_active_moves = choose_pokemon(user_team, team_size)
-            ai_active_pokemon, ai_active_moves = max(ai_team, key=lambda p: calculate_type_advantage(p[0][2], user_active_pokemon[2], user_active_pokemon[3]))
-            user_hp = user_active_pokemon[4]
-            ai_hp = ai_active_pokemon[4]
-            first_turn = False
-            print(f"\nGennaro (Bullo) manda in campo {ai_active_pokemon[1]}")
-
+            
         while user_hp > 0 and ai_hp > 0:
-            user_switched = False
             ai_switched = False
-            user_move = handle_user_turn(user_active_pokemon, user_active_moves, cursor, user_team)
+            
+            print(f"\nCosa deve fare {user_active_pokemon[1]}?")
+            print("\n[1] Attaccare")
+            print("\n[2] Usare strumenti")
+            print("\n[3] Cambiare Pokémon")
 
+            while True:
+                try:
+                    user_choice = int(input("Seleziona un'opzione (1, 2 o 3): "))
+                    if user_choice in [1, 2, 3]:
+                        break
+                    else:
+                        print("Scelta non valida. Riprova.")
+                except ValueError:
+                    print("Inserisci un numero valido.")
+
+
+            if user_choice == 1:
+                user_move = choose_move([user_active_pokemon, user_active_moves])
+            elif user_choice == 2:
+                use_potion_menu(cursor, user_active_pokemon)
+            else:
+                user_move = choose_pokemon(user_team, team_size)
+
+            #sostituzione
+            if user_move == 3:
+                user_active_pokemon, user_active_moves = user_move
+                user_hp = user_active_pokemon[4]
+
+            #va messa anche la scelta dell'ia //////////////////////////////////////////
 
             if compare_speed(user_active_pokemon, ai_active_pokemon) == user_active_pokemon:
 
-                #sostituzione
-                if isinstance(user_move, tuple):
-                    user_active_pokemon, user_active_moves = user_move
-                    user_hp = user_active_pokemon[4]
-                    user_switched = True
+            
             
                 #attacco
-                if not user_switched and user_hp > 0 and execute_move(user_active_pokemon, user_move, ai_active_pokemon):
-                    print(f"\nIl {ai_active_pokemon[1]} avversario non è più in grado di lottare!")
-                    ai_team.remove([ai_active_pokemon, ai_active_moves])
-                    ai_defeated = True
-                    break
+                if user_move == 1 and user_hp > 0 and execute_move(user_active_pokemon, user_move, ai_active_pokemon):
+                    print(f"\nIl tuo {ai_active_pokemon[1]} non è più in grado di lottare!")
+                    ai_team.remove([user_active_pokemon, ai_active_moves])
+                    
+                    if ai_team:
+                        ai_active_pokemon, ai_active_moves = max(ai_team, key=lambda p: calculate_type_advantage(p[0][2], user_active_pokemon[2], user_active_pokemon[3]))
+                        ai_hp = ai_active_pokemon[4]
+                        ai_defeated = False
+                        print(f"\nGennaro (Bullo) manda in campo {ai_active_pokemon[1]}. Gennaro è pronto a vendicarsi!")
+                    else:
+                        print(f"\nHai vinto la battaglia. Ti senti fiero di rapinare un bambino?")
+                        break
+                    
             
                 #turno ia
                 ai_token = use_ai_potion(cursor, ai_active_pokemon, ai_token) #da controllare
                 ai_move = select_best_move(ai_active_moves, user_active_pokemon)
-                if ai_hp > 0 and execute_move(ai_active_pokemon, ai_move, user_active_pokemon):
-                    print(f"\nIl tuo {ai_active_pokemon[1]} non è più in grado di lottare!")
+                if not ai_switched and ai_hp > 0 and execute_move(ai_active_pokemon, ai_move, user_active_pokemon):
+                    print(f"\nIl tuo {user_active_pokemon[1]} non è più in grado di lottare!")
                     user_team.remove([user_active_pokemon, user_active_moves])
-                    user_defeated = True
-                    break
+                    if user_team:
+                        show_team(user_team)
+                        while True:
+                            try:
+                                print(f"\nScegli il tuo Pokémon successivo")
+                                user_active_pokemon, user_active_moves = choose_pokemon(user_team, team_size)
+                                user_hp = user_active_pokemon[4]
+                                print(f"\nVai {user_active_pokemon[1]}, vendica il tuo compagno!")
+                                break
+                            except ValueError:
+                                print(f"Scelta non valida. Riprova.")
+                    else:
+                        print(f"\nHai perso la battaglia. Sborsa i soldi!")
+                        break
+                    
 
             else:
-                #sostituzione
-                if isinstance(user_move, tuple):
-                    user_active_pokemon, user_active_moves = user_move
-                    user_hp = user_active_pokemon[4]
-                    user_switched = True
                 
                 #turno ia
                 ai_token = use_ai_potion(cursor, ai_active_pokemon, ai_token) #da controllare
                 ai_move = select_best_move(ai_active_moves, user_active_pokemon)
-                if ai_hp > 0 and execute_move(ai_active_pokemon, ai_move, user_active_pokemon):
-                    print(f"\nIl tuo {ai_active_pokemon[1]} non è più in grado di lottare!")
+                if not ai_switched and ai_hp > 0 and execute_move(ai_active_pokemon, ai_move, user_active_pokemon):
+                    print(f"\nIl tuo {user_active_pokemon[1]} non è più in grado di lottare!")
                     user_team.remove([user_active_pokemon, user_active_moves])
-                    user_defeated = True
-                    break
+                    if user_team:
+                        show_team(user_team)
+                        while True:
+                            try:
+                                print(f"\nScegli il tuo Pokémon successivo")
+                                user_active_pokemon, user_active_moves = choose_pokemon(user_team, team_size)
+                                user_hp = user_active_pokemon[4]
+                                print(f"\nVai {user_active_pokemon[1]}, vendica il tuo compagno!")
+                                break
+                            except ValueError:
+                                print(f"Scelta non valida. Riprova.")
+                    else:
+                        print(f"\nHai perso la battaglia. Sborsa i soldi!")
+                        break
+                    
 
                 #attacco
-                if not user_switched and user_hp > 0 and execute_move(user_active_pokemon, user_move, ai_active_pokemon):
-                    print(f"\nIl {ai_active_pokemon[1]} avversario non è più in grado di lottare!")
-                    ai_team.remove([ai_active_pokemon, ai_active_moves])
-                    ai_defeated = True
-                    break
+                if user_move == 1 and user_hp > 0 and execute_move(user_active_pokemon, user_move, ai_active_pokemon):
+                    print(f"\nIl tuo {ai_active_pokemon[1]} non è più in grado di lottare!")
+                    ai_team.remove([user_active_pokemon, ai_active_moves])
+                    
+                    if ai_team:
+                        ai_active_pokemon, ai_active_moves = max(ai_team, key=lambda p: calculate_type_advantage(p[0][2], user_active_pokemon[2], user_active_pokemon[3]))
+                        ai_hp = ai_active_pokemon[4]
+                        ai_defeated = False
+                        print(f"\nGennaro (Bullo) manda in campo {ai_active_pokemon[1]}. Gennaro è pronto a vendicarsi!")
+                    else:
+                        print(f"\nHai vinto la battaglia. Ti senti fiero di rapinare un bambino?")
+                        break
 
-        if user_defeated:
-            show_team(user_team)
-            while True:
-                try:
-                    print(f"\nScegli il tuo Pokémon successivo")
-                    user_active_pokemon, user_active_moves = choose_pokemon(user_team, team_size)
-                    user_hp = user_active_pokemon[4]
-                    user_defeated = False
-                    print(f"\nVai {user_active_pokemon[1]}, vendica il tuo compagno!")
-                    break
-                except ValueError:
-                    print(f"Scelta non valida. Riprova.")
-        if ai_defeated:
-            if ai_team:
-                ai_active_pokemon, ai_active_moves = max(ai_team, key=lambda p: calculate_type_advantage(p[0][2], user_active_pokemon[2], user_active_pokemon[3]))
-                ai_hp = ai_active_pokemon[4]
-                ai_defeated = False
-                print(f"\nGennaro (Bullo) manda in campo {ai_active_pokemon[1]}. Gennaro è pronto a vendicarsi!")
 
-    print(f"\nHai perso la battaglia. Sborsa i soldi!" if not user_team else "\nHai vinto la battaglia. Ti senti fiero di rapinare un bambino?")
 
 
 # Funzione per simulare una battaglia IA vs IA
