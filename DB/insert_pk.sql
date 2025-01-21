@@ -17,6 +17,11 @@ VALUES
 (497, 'Serperior', 'Grass', NULL, 75, 75, 95, 75, 95, 113),
 (282, 'Gardevoir', 'Psychic', 'Fairy', 68, 65, 65, 125, 115, 80);
 
+INSERT INTO pozione (nome, quatità)
+VALUES
+('pozione', 3),
+('superpozione', 2),
+('iperpozione', 1);
 
 -- Inserimenti nella tabella mossa
 INSERT INTO mossa (id, nome, type_1, damage, accuracy, categoria)

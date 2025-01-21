@@ -34,3 +34,9 @@ PRIMARY KEY (id_pk, id_mossa),
 FOREIGN KEY (id_pk) REFERENCES pokemon(id),
 FOREIGN KEY (id_mossa) REFERENCES mossa(id)
 );
+
+CREATE Table pozione (
+    nome varchar(20) primary key not null,
+    CHECK (nome IN ('pozione', 'superpozione', 'iperpozione')),
+    quatità int not null
+);
