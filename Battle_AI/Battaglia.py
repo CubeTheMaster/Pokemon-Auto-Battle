@@ -62,6 +62,43 @@ def use_potion_menu(cursor, pokemon):
         except ValueError:
             print("Inserisci un numero valido.")
 
+def select_best_ai_pokemon(ai_team, user_active_pokemon):
+    """
+    Seleziona il Pokémon dell'IA con la massima efficacia contro il Pokémon attivo dell'utente.
+    
+    Args:
+        ai_team (list): Lista dei Pokémon dell'IA.
+        user_active_pokemon (tuple): Pokémon attivo dell'utente.
+    
+    Returns:
+        tuple: (Pokémon selezionato, Mosse del Pokémon selezionato)
+    """
+    best_pokemon = None
+    best_moves = None
+    highest_advantage = -1
+
+    for ai_pokemon, ai_moves in ai_team:
+        advantage = calculate_type_advantage(ai_pokemon[2], user_active_pokemon[2], user_active_pokemon[3])
+        if advantage > highest_advantage:
+            highest_advantage = advantage
+            best_pokemon = ai_pokemon
+            best_moves = ai_moves
+    
+    return best_pokemon, best_moves
+
+def still_best_pokemon(ai_pokemon, user_active_pokemon, ai_team):
+    best_pokemon = None
+    highest_advantage = -1
+
+    for pokemon in ai_team:
+        advantage = calculate_type_advantage(pokemon[2], user_active_pokemon[2], user_active_pokemon[3])
+        if advantage > highest_advantage:
+            highest_advantage = advantage
+            best_pokemon = pokemon
+    if ai_pokemon == best_pokemon:
+        return True
+    else:
+        return False
 
 # Funzione per scegliere la mossa migliore
 def select_best_move(moves, opponent):
@@ -129,19 +166,17 @@ def user_vs_ai_battle(user_team, ai_team, cursor, team_size):
 
     user_active_pokemon, user_active_moves = choose_pokemon(user_team, team_size)
     print(f"\nVai {user_active_pokemon[1]}! Io credo in te!")
-    ai_active_pokemon, ai_active_moves = max(ai_team, key=lambda p: calculate_type_advantage(p[0][2], user_active_pokemon[2], user_active_pokemon[3]))
+    ai_active_pokemon, ai_active_moves = select_best_ai_pokemon(ai_team, user_active_pokemon)
     user_hp = user_active_pokemon[4]
     ai_hp = ai_active_pokemon[4]
     max_hp = ai_active_pokemon[4]
     print(f"\nGennaro (Bullo) manda in campo {ai_active_pokemon[1]}")
 
 
-    ai_switched = False
 
     while user_team and ai_team:
             
         while user_hp > 0 and ai_hp > 0:
-            ai_switched = False
             
             print(f"\nCosa deve fare {user_active_pokemon[1]}?")
             print("\n[1] Attaccare")
@@ -164,17 +199,14 @@ def user_vs_ai_battle(user_team, ai_team, cursor, team_size):
             elif user_choice == 2:
                 use_potion_menu(cursor, user_active_pokemon)
                 user_hp = user_active_pokemon[4]
-            else:
-                user_move = choose_pokemon(user_team, team_size)
-
-            #sostituzione
-            if user_choice == 3:
+            elif user_choice == 3:
                 show_team(user_team)
                 user_active_pokemon, user_active_moves = choose_pokemon(user_team, team_size)
                 print(f"\nVai {user_active_pokemon[1]}! Io credo in te!")
                 user_hp = user_active_pokemon[4]
 
             #va messa anche la scelta dell'ia //////////////////////////////////////////
+
 
             if compare_speed(user_active_pokemon, ai_active_pokemon) == user_active_pokemon:
 
@@ -187,7 +219,7 @@ def user_vs_ai_battle(user_team, ai_team, cursor, team_size):
                         print(f"\nIl {ai_active_pokemon[1]} di Gennaro (Bullo) non è più in grado di lottare!")
                         ai_team.remove([ai_active_pokemon, ai_active_moves])
                         if ai_team:
-                            ai_active_pokemon, ai_active_moves = max(ai_team, key=lambda p: calculate_type_advantage(p[0][2], user_active_pokemon[2], user_active_pokemon[3]))
+                            ai_active_pokemon, ai_active_moves = select_best_ai_pokemon(ai_team, user_active_pokemon)
                             ai_hp = ai_active_pokemon[4]
                             max_hp = ai_active_pokemon[4]
                             print(f"\nGennaro (Bullo) manda in campo {ai_active_pokemon[1]}. Gennaro è pronto a vendicarsi!")
@@ -199,14 +231,13 @@ def user_vs_ai_battle(user_team, ai_team, cursor, team_size):
             
                 #turno ia
                 if not defeated:
-                    use_heal = max_hp * 0.8
+                    use_heal = max_hp * 0.2
                     if ai_active_pokemon[4] <= use_heal and ai_token > 0:
-                        ai_token = use_ai_potion(cursor, ai_active_pokemon, ai_token) #da controllare
-                    else:
-                        print(f"{ai_active_pokemon[4] <= 50} dovrebbe curarsi")
+                        ai_token = use_ai_potion(cursor, ai_active_pokemon, ai_token)
+                    elif still_best_pokemon(ai_active_pokemon, user_active_pokemon, ai_team):
                         ai_move = select_best_move(ai_active_moves, user_active_pokemon)
                         user_defeated = execute_move(ai_active_pokemon, ai_move, user_active_pokemon)
-                        if not ai_switched and ai_hp > 0 and user_defeated:
+                        if ai_hp > 0 and user_defeated:
                             print(f"\nIl tuo {user_active_pokemon[1]} non è più in grado di lottare!")
                             user_team.remove([user_active_pokemon, user_active_moves])
                             user_defeated = False
@@ -225,20 +256,24 @@ def user_vs_ai_battle(user_team, ai_team, cursor, team_size):
                                 print(f"\nHai perso la battaglia. Sborsa i soldi!")
                                 reset_potions(cursor)
                                 break
+                    else:
+                        ai_active_pokemon, ai_active_moves = select_best_ai_pokemon(ai_team, user_active_pokemon)
+                        ai_hp = ai_active_pokemon[4]
+                        max_hp = ai_active_pokemon[4]
+                        print(f"\nGennaro (Bullo) manda in campo {ai_active_pokemon[1]}. Gennaro è pronto a vendicarsi!")
                 else:
                     defeated = False
 
             else:
                 
                 #turno ia
-                use_heal = max_hp * 0.8
+                use_heal = max_hp * 0.2
                 if ai_active_pokemon[4] <= use_heal and ai_token > 0:
                     ai_token = use_ai_potion(cursor, ai_active_pokemon, ai_token) #da controllare
-                else:
-                    print(f"{ai_active_pokemon[4] <= 50} dovrebbe curarsi")
+                elif still_best_pokemon(ai_active_pokemon, user_active_pokemon, ai_team):
                     ai_move = select_best_move(ai_active_moves, user_active_pokemon)
                     user_defeated = execute_move(ai_active_pokemon, ai_move, user_active_pokemon)
-                    if not ai_switched and ai_hp > 0 and user_defeated:
+                    if ai_hp > 0 and user_defeated:
                         print(f"\nIl tuo {user_active_pokemon[1]} non è più in grado di lottare!")
                         user_team.remove([user_active_pokemon, user_active_moves])
                         user_defeated = False
@@ -257,7 +292,11 @@ def user_vs_ai_battle(user_team, ai_team, cursor, team_size):
                             print(f"\nHai perso la battaglia. Sborsa i soldi!")
                             reset_potions(cursor)
                             break
-                    
+                else:
+                    ai_active_pokemon, ai_active_moves = select_best_ai_pokemon(ai_team, user_active_pokemon)
+                    ai_hp = ai_active_pokemon[4]
+                    max_hp = ai_active_pokemon[4]
+                    print(f"\nGennaro (Bullo) manda in campo {ai_active_pokemon[1]}. Gennaro è pronto a vendicarsi!")    
 
                 #attacco
                 if user_choice == 1:
@@ -267,7 +306,7 @@ def user_vs_ai_battle(user_team, ai_team, cursor, team_size):
                         ai_team.remove([ai_active_pokemon, ai_active_moves])
                         defeated = False   
                         if ai_team:
-                            ai_active_pokemon, ai_active_moves = max(ai_team, key=lambda p: calculate_type_advantage(p[0][2], user_active_pokemon[2], user_active_pokemon[3]))
+                            ai_active_pokemon, ai_active_moves = select_best_ai_pokemon(ai_team, user_active_pokemon)
                             ai_hp = ai_active_pokemon[4]
                             max_hp = ai_active_pokemon[4]
                             print(f"\nGennaro (Bullo) manda in campo {ai_active_pokemon[1]}. Gennaro è pronto a vendicarsi!")
