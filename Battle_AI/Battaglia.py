@@ -78,7 +78,7 @@ def select_best_ai_pokemon(ai_team, user_active_pokemon):
     highest_advantage = -1
 
     for ai_pokemon, ai_moves in ai_team:
-        advantage = calculate_type_advantage(ai_pokemon[2], user_active_pokemon[2], user_active_pokemon[3])
+        advantage = calculate_type_advantage(ai_pokemon[2], user_active_pokemon[2], user_active_pokemon[3], ai_pokemon[3])
         if advantage > highest_advantage:
             highest_advantage = advantage
             best_pokemon = ai_pokemon
@@ -91,7 +91,7 @@ def still_best_pokemon(ai_pokemon, user_active_pokemon, ai_team):
     highest_advantage = -1
 
     for pokemon in ai_team:
-        advantage = calculate_type_advantage(pokemon[2], user_active_pokemon[2], user_active_pokemon[3])
+        advantage = calculate_type_advantage(pokemon[2], user_active_pokemon[2], user_active_pokemon[3], pokemon[3])
         if advantage > highest_advantage:
             highest_advantage = advantage
             best_pokemon = pokemon
@@ -205,8 +205,6 @@ def user_vs_ai_battle(user_team, ai_team, cursor, team_size):
                 print(f"\nVai {user_active_pokemon[1]}! Io credo in te!")
                 user_hp = user_active_pokemon[4]
 
-            #va messa anche la scelta dell'ia //////////////////////////////////////////
-
 
             if compare_speed(user_active_pokemon, ai_active_pokemon) == user_active_pokemon:
 
@@ -234,7 +232,7 @@ def user_vs_ai_battle(user_team, ai_team, cursor, team_size):
                     use_heal = max_hp * 0.2
                     if ai_active_pokemon[4] <= use_heal and ai_token > 0:
                         ai_token = use_ai_potion(cursor, ai_active_pokemon, ai_token)
-                    elif still_best_pokemon(ai_active_pokemon, user_active_pokemon, ai_team):
+                    elif ai_active_pokemon == select_best_ai_pokemon(ai_team, user_active_pokemon)[0]:
                         ai_move = select_best_move(ai_active_moves, user_active_pokemon)
                         user_defeated = execute_move(ai_active_pokemon, ai_move, user_active_pokemon)
                         if ai_hp > 0 and user_defeated:
@@ -252,6 +250,7 @@ def user_vs_ai_battle(user_team, ai_team, cursor, team_size):
                                         break
                                     except ValueError:
                                         print(f"Scelta non valida. Riprova.")
+                                break
                             else:
                                 print(f"\nHai perso la battaglia. Sborsa i soldi!")
                                 reset_potions(cursor)
@@ -270,7 +269,7 @@ def user_vs_ai_battle(user_team, ai_team, cursor, team_size):
                 use_heal = max_hp * 0.2
                 if ai_active_pokemon[4] <= use_heal and ai_token > 0:
                     ai_token = use_ai_potion(cursor, ai_active_pokemon, ai_token) #da controllare
-                elif still_best_pokemon(ai_active_pokemon, user_active_pokemon, ai_team):
+                elif ai_active_pokemon == select_best_ai_pokemon(ai_team, user_active_pokemon)[0]:
                     ai_move = select_best_move(ai_active_moves, user_active_pokemon)
                     user_defeated = execute_move(ai_active_pokemon, ai_move, user_active_pokemon)
                     if ai_hp > 0 and user_defeated:
@@ -394,7 +393,7 @@ def ai_vs_ai_battle(ai_team_1, ai_team_2, cursor):
 
 
 # Funzione per calcolare l'efficacia di tipo
-def calculate_type_advantage(attacking_type, defender_type_1, defender_type_2=None):
+def calculate_type_advantage(attacking_type_1, defender_type_1, defender_type_2=None, attacking_type_2=None):
     type_chart = {
         'Normal': {'weak_to': ['Fighting'], 'strong_against': [], 'immune_to': ['Ghost']},
         'Fire': {'weak_to': ['Water', 'Rock', 'Ground'], 'strong_against': ['Grass', 'Ice', 'Bug', 'Steel'], 'immune_to': []},
@@ -430,11 +429,15 @@ def calculate_type_advantage(attacking_type, defender_type_1, defender_type_2=No
             multiplier *= 0.0  # No effect
 
     # Check against the first defender type
-    calculate_effect(attacking_type, defender_type_1)
+    calculate_effect(attacking_type_1, defender_type_1)
+    if attacking_type_2:
+        calculate_effect(attacking_type_2, defender_type_1)
 
     # Check against the second defender type if it exists
     if defender_type_2:
-        calculate_effect(attacking_type, defender_type_2)
+        calculate_effect(attacking_type_1, defender_type_2)
+        if attacking_type_2:
+            calculate_effect(attacking_type_2, defender_type_2)
 
     return multiplier
 
