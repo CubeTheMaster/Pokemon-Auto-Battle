@@ -1,11 +1,11 @@
 
-# Funzione per ottenere dei Pokémon casuali
+#Function to get a random team of Pokémon
 def get_random_pokemons(cursor, team_size):
     query = "SELECT * FROM pokemon ORDER BY RAND() LIMIT %s"
     cursor.execute(query, [team_size,])
     return [list(pokemon) for pokemon in cursor.fetchall()]
 
-# Funzione per scegliere un Pokémon iniziale
+#Function to change Pokémon
 def choose_pokemon(team, team_size):
     if team_size == 1:
         return team[0][0], team[0][1]

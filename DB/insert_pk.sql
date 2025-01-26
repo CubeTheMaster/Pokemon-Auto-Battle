@@ -1,5 +1,4 @@
 
--- Inserimenti nella tabella pokemon
 INSERT INTO pokemon (id, name, type_1, type_2, hp, attack, defense, sp_attack, sp_defense, speed)
 VALUES
 (25, 'Pikachu', 'Electric', NULL, 35, 55, 40, 50, 50, 90),
@@ -23,7 +22,6 @@ VALUES
 ('superpozione', 2),
 ('iperpozione', 1);
 
--- Inserimenti nella tabella mossa
 INSERT INTO mossa (id, nome, type_1, damage, accuracy, categoria)
 VALUES
 (1, 'Tackle', 'Normal', 20, 100, 'fisica'),
@@ -64,7 +62,6 @@ VALUES
 (36, 'Brick Break', 'Fighting', 37, 100, 'fisica'),
 (37, 'Spirit Break', 'Fairy', 37, 100, 'fisica');
 
--- Inserimenti nella tabella conosce (associando i Pokémon alle mosse)
 INSERT INTO conosce (id_pk, id_mossa)
 VALUES
 (25, 1),  -- Pikachu conosce Tackle

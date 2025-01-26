@@ -3,6 +3,7 @@ from Accuracy import does_move_hit
 from Cura import *
 import random
 
+#Function that calculate the damage and if the move hit
 def calculate_damage_and_hit(move, attacker, defender):
     if does_move_hit(move[4]):
         type_effectiveness = calculate_type_advantage(move[2], defender[2], defender[3])
@@ -12,6 +13,7 @@ def calculate_damage_and_hit(move, attacker, defender):
         return damage, True
     return 0, False
 
+#Function that execute the move
 def execute_move(attacker, move, defender):
     print(f"{attacker[1]} usa {move[1]}!")
     damage, hit = calculate_damage_and_hit(move, attacker, defender)
@@ -22,6 +24,7 @@ def execute_move(attacker, move, defender):
         print(f"{attacker[1]} ha mancato!")
     return defender[4] <= 0
 
+#Function that use a potion for the ai
 def use_ai_potion(cursor, ai_pokemon, ai_token):
     cursor.execute("SELECT hp FROM pokemon WHERE id = %s", (ai_pokemon[0],))
     pokemon_maxHP = cursor.fetchone()
@@ -33,10 +36,10 @@ def use_ai_potion(cursor, ai_pokemon, ai_token):
         return ai_token - 1
     return ai_token
 
+#Function that use a potion for the user
 def use_potion_menu(cursor, pokemon):
     print(f"\nScegli una pozione da usare:")
     
-    # Recupera le pozioni disponibili con quantità maggiore di zero
     cursor.execute("SELECT nome FROM pozione WHERE quatità > 0")
     potions = [row[0] for row in cursor.fetchall()]
     
@@ -45,7 +48,6 @@ def use_potion_menu(cursor, pokemon):
         return
     
     for idx, potion in enumerate(potions):
-        # Recupera la quantità disponibile per ogni pozione
         cursor.execute("SELECT quatità FROM pozione WHERE nome = %s", (potion,))
         quantity = cursor.fetchone()[0]
         print(f"[{idx + 1}] {potion.capitalize()} (Disponibili: {quantity})")
@@ -62,17 +64,8 @@ def use_potion_menu(cursor, pokemon):
         except ValueError:
             print("Inserisci un numero valido.")
 
+#Fuction that choose the best pokemon to send in battle
 def select_best_ai_pokemon(ai_team, user_active_pokemon):
-    """
-    Seleziona il Pokémon dell'IA con la massima efficacia contro il Pokémon attivo dell'utente.
-    
-    Args:
-        ai_team (list): Lista dei Pokémon dell'IA.
-        user_active_pokemon (tuple): Pokémon attivo dell'utente.
-    
-    Returns:
-        tuple: (Pokémon selezionato, Mosse del Pokémon selezionato)
-    """
     best_pokemon = None
     best_moves = None
     highest_advantage = -1
@@ -86,21 +79,7 @@ def select_best_ai_pokemon(ai_team, user_active_pokemon):
     
     return best_pokemon, best_moves
 
-def still_best_pokemon(ai_pokemon, user_active_pokemon, ai_team):
-    best_pokemon = None
-    highest_advantage = -1
-
-    for pokemon in ai_team:
-        advantage = calculate_type_advantage(pokemon[2], user_active_pokemon[2], user_active_pokemon[3], pokemon[3])
-        if advantage > highest_advantage:
-            highest_advantage = advantage
-            best_pokemon = pokemon
-    if ai_pokemon == best_pokemon:
-        return True
-    else:
-        return False
-
-# Funzione per scegliere la mossa migliore
+#Function that select the best move for the ai
 def select_best_move(moves, opponent):
     best_move = None
     best_score = 0
@@ -110,7 +89,7 @@ def select_best_move(moves, opponent):
         accuracy = move[4]
         type_effectiveness = calculate_type_advantage(move[2], opponent[2], opponent[3])
 
-        # Se l'avversario ha pochi HP, privilegia precisione
+        #If the opponent has less HP than the damage, use the accuracy
         if opponent[4] <= damage:
             score = accuracy * type_effectiveness
         else:
@@ -122,15 +101,18 @@ def select_best_move(moves, opponent):
 
     return best_move
 
+#Fuction that show the moves of a pokemon
 def show_moves(pokemon):
     print(f"\nLe mosse di {pokemon[0]}:")
     for move in pokemon[1]:
         print(f"- {move[0]} (Potenza: {move[3]}, Precisione: {move[4]})")
 
+#Function that show the team of the user
 def show_team(user_team):
     print(f"\nIl tuo team attuale:")
     display_team(user_team)
 
+#Fuction that compare the speed of two pokemon
 def compare_speed(pokemon1, pokemon2):
     if pokemon1[9] > pokemon2[9]:
         return pokemon1
@@ -139,6 +121,7 @@ def compare_speed(pokemon1, pokemon2):
     else:
         return random.choice([pokemon1, pokemon2])
     
+#Function that choose the move for the user
 def choose_move(pokemon_moves):
     print(f"\nScegli una mossa per {pokemon_moves[0][1]}:")
     for idx, move in enumerate(pokemon_moves[1]):
@@ -154,10 +137,11 @@ def choose_move(pokemon_moves):
         except ValueError:
             print("Inserisci un numero valido.")
 
+#Function that make the battle between the user and the ai
 def user_vs_ai_battle(user_team, ai_team, cursor, team_size):
     print(f"\nInizia la battaglia!")
 
-    #varaiables neeeded to make battle logic work
+    #Varaiables neeeded to make battle logic work
     ai_token = 3
     defeated = False
     user_defeated = False
@@ -210,7 +194,7 @@ def user_vs_ai_battle(user_team, ai_team, cursor, team_size):
 
             
             
-                #attacco
+                #User turn
                 if user_choice == 1:
                     defeated = execute_move(user_active_pokemon, user_move, ai_active_pokemon)
                     if user_hp > 0 and defeated:
@@ -227,7 +211,7 @@ def user_vs_ai_battle(user_team, ai_team, cursor, team_size):
                             break
                     
             
-                #turno ia
+                #Ai turn
                 if not defeated:
                     use_heal = max_hp * 0.2
                     if ai_active_pokemon[4] <= use_heal and ai_token > 0:
@@ -265,7 +249,7 @@ def user_vs_ai_battle(user_team, ai_team, cursor, team_size):
 
             else:
                 
-                #turno ia
+                #Ai turn
                 use_heal = max_hp * 0.2
                 if ai_active_pokemon[4] <= use_heal and ai_token > 0:
                     ai_token = use_ai_potion(cursor, ai_active_pokemon, ai_token) #da controllare
@@ -297,7 +281,7 @@ def user_vs_ai_battle(user_team, ai_team, cursor, team_size):
                     max_hp = ai_active_pokemon[4]
                     print(f"\nGennaro (Bullo) manda in campo {ai_active_pokemon[1]}. Gennaro è pronto a vendicarsi!")    
 
-                #attacco
+                #User turn
                 if user_choice == 1:
                     defeated = execute_move(user_active_pokemon, user_move, ai_active_pokemon)
                     if user_hp > 0 and defeated:
@@ -316,83 +300,7 @@ def user_vs_ai_battle(user_team, ai_team, cursor, team_size):
                             break
 
 
-
-
-# Funzione per simulare una battaglia IA vs IA
-def ai_vs_ai_battle(ai_team_1, ai_team_2, cursor):
-    print(f"\nBattaglia tra due squadre IA!")
-
-    ai1_token = 3  # Token per le pozioni della prima IA
-    ai2_token = 3  # Token per le pozioni della seconda IA
-
-    while ai_team_1 and ai_team_2:
-        ai1_active_pokemon, ai1_active_moves = ai_team_1[0]
-        ai2_active_pokemon, ai2_active_moves = ai_team_2[0]
-
-        print(f"{ai1_active_pokemon[1]} VS {ai2_active_pokemon[1]}")
-
-        ai1_hp = ai1_active_pokemon[4]
-        ai2_hp = ai2_active_pokemon[4]
-
-        while ai1_hp > 0 and ai2_hp > 0:
-            if ai1_active_pokemon[9] >= ai2_active_pokemon[9]:
-                print(f"Il {ai1_active_pokemon[1]} usa una mossa!")
-                ai1_move = select_best_move(ai1_active_moves, ai2_active_pokemon)
-                damage, hit = calculate_damage_and_hit(ai1_move, ai1_active_pokemon, ai2_active_pokemon)
-                if hit:
-                    ai2_hp -= damage
-                    ai2_active_pokemon[4] = max(ai2_hp, 0)
-                    print(f"{ai2_active_pokemon[1]} subisce {damage:.2f} danni! Rimangono {ai2_hp:.2f} HP.")
-
-                    if ai2_hp <= 0:
-                        print(f"{ai2_active_pokemon[1]} è stato sconfitto!")
-                        ai_team_2.pop(0)
-                        break
-                else:
-                    print(f"Il {ai1_active_pokemon[1]} ha mancato!")
-
-                if ai2_hp > 0 and ai2_hp <= 0.1 * ai2_active_pokemon[4] and ai2_token > 0:
-                    if ai2_token == 3:
-                        print(f"Il {ai2_active_pokemon[1]} usa una iperpozione!")
-                        use_potion(cursor, ai2_active_pokemon, 'iperpozione')
-                    else:
-                        print(f"Il {ai2_active_pokemon[1]} usa una superpozione!")
-                        use_potion(cursor, ai2_active_pokemon, 'superpozione')
-                    ai2_token -= 1
-
-            else:
-                print(f"Il {ai2_active_pokemon[1]} usa una mossa!")
-                ai2_move = select_best_move(ai2_active_moves, ai1_active_pokemon)
-                damage, hit = calculate_damage_and_hit(ai2_move, ai2_active_pokemon, ai1_active_pokemon)
-                if hit:
-                    ai1_hp -= damage
-                    ai1_active_pokemon[4] = max(ai1_hp, 0)
-                    print(f"{ai1_active_pokemon[1]} subisce {damage:.2f} danni! Rimangono {ai1_hp:.2f} HP.")
-
-                    if ai1_hp <= 0:
-                        print(f"{ai1_active_pokemon[1]} è stato sconfitto!")
-                        ai_team_1.pop(0)
-                        break
-                else:
-                    print(f"Il {ai2_active_pokemon[1]} ha mancato!")
-
-                if ai1_hp > 0 and ai1_hp <= 0.1 * ai1_active_pokemon[4] and ai1_token > 0:
-                    if ai1_token == 3:
-                        print(f"Il {ai1_active_pokemon[1]} usa una iperpozione!")
-                        use_potion(cursor, ai1_active_pokemon, 'iperpozione')
-                    else:
-                        print(f"Il {ai1_active_pokemon[1]} usa una superpozione!")
-                        use_potion(cursor, ai1_active_pokemon, 'superpozione')
-                    ai1_token -= 1
-
-    if not ai_team_1:
-        print(f"\nLa seconda squadra IA ha vinto!")
-    elif not ai_team_2:
-        print(f"\nLa prima squadra IA ha vinto!")
-                    
-
-
-# Funzione per calcolare l'efficacia di tipo
+#Fuction that calculate the type advantage
 def calculate_type_advantage(attacking_type_1, defender_type_1, defender_type_2=None, attacking_type_2=None):
     type_chart = {
         'Normal': {'weak_to': ['Fighting'], 'strong_against': [], 'immune_to': ['Ghost']},
@@ -415,10 +323,10 @@ def calculate_type_advantage(attacking_type_1, defender_type_1, defender_type_2=
         'Fairy': {'weak_to': ['Poison', 'Steel'], 'strong_against': ['Fighting', 'Dragon', 'Dark'], 'immune_to': ['Dragon']}
     }
 
-    # Start with a neutral multiplier
+    #Start with a neutral multiplier
     multiplier = 1.0
 
-    # Helper function to calculate effect
+    #Helper function to calculate effect
     def calculate_effect(attacking, defending):
         nonlocal multiplier
         if defending in type_chart[attacking]['strong_against']:
@@ -428,12 +336,12 @@ def calculate_type_advantage(attacking_type_1, defender_type_1, defender_type_2=
         elif defending in type_chart[attacking]['immune_to']:
             multiplier *= 0.0  # No effect
 
-    # Check against the first defender type
+    #Check against the first defender type
     calculate_effect(attacking_type_1, defender_type_1)
     if attacking_type_2:
         calculate_effect(attacking_type_2, defender_type_1)
 
-    # Check against the second defender type if it exists
+    #Check against the second defender type if it exists
     if defender_type_2:
         calculate_effect(attacking_type_1, defender_type_2)
         if attacking_type_2:
@@ -441,7 +349,7 @@ def calculate_type_advantage(attacking_type_1, defender_type_1, defender_type_2=
 
     return multiplier
 
-# Funzione per stampare il team dell'utente
+#Function that display the team
 def display_team(team):
     for idx, (pokemon, moves) in enumerate(team):
         print(f"[{idx + 1}] {pokemon[1]} (HP: {pokemon[4]})")

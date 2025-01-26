@@ -1,6 +1,6 @@
 import random
 
-# Funzione per recuperare le mosse di un Pokémon
+#Function to get the moves of a Pokémon
 def get_moves(cursor, pokemon_id):
     query = """
         SELECT m.* FROM mossa m
@@ -10,7 +10,7 @@ def get_moves(cursor, pokemon_id):
     cursor.execute(query, [pokemon_id,])
     return cursor.fetchall()
 
-# Funzione per assegnare mosse casuali ai Pokémon
+#Function to assign random moves to the Pokémon
 def assign_random_moves(cursor, pokemons):
     team_with_moves = []
     for pokemon in pokemons:
