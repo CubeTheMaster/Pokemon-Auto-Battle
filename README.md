@@ -46,9 +46,6 @@ This project simulates a Pokémon battle, integrating strategic artificial intel
 
 1. debug the main.py file
 
-## Project Structure
-
-
 ## Contributions
 
 We warmly welcome contributions to improve this project! Whether you'd like to fix a bug, enhance a feature, or add new functionality, your efforts are greatly appreciated.
