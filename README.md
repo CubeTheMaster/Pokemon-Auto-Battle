@@ -7,7 +7,6 @@ This project simulates a Pokémon battle, integrating strategic artificial intel
 - [Requirements](#Requirements)
 - [Installation](#Installation)
 - [Usage](#Usage)
-- [Project Structure](#Project-Structure)
 - [Contributions](#Contributions)
 - [Credits](#Credits)
 - [License](#License)
